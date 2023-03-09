@@ -74,41 +74,59 @@ void reorderList1(ListNode* head) {
   node->next = nullptr;
 }
 
+// Version 2:
+//    Runtime 48 ms Beats 39.35%
+//    Memory 17.8 MB Beats 51.6%
 void reorderList(ListNode* head) {
   // do nothing for link lists that have 0, 1 or 2 elements
   if ((head == nullptr) || (head->next == nullptr) || (head->next->next == nullptr))
     return;
 
-  int num_nodes = 0, num = 0;
-  ListNode* node = head;
+  ListNode* slow = head;
+  ListNode* fast = head->next;
+
+  while ((fast) && (fast->next)) {
+    slow = slow->next;
+    fast = fast->next->next;
+  }
+
+  // slow is pointing to the middle element of the list
+  // cout << "slow: " << slow->val << endl;
+
+  // get the element next to the middle element
+  ListNode* second = slow->next;
+  // in our new list the middle element is the last element so it should point to null
+  slow->next = nullptr;
+
+  // reverse the second half of the list starting with second
+  ListNode* previous = nullptr;
   ListNode* temp;
-  stack<ListNode*> stack_nodes;
-
-  // add all the nodes on to the stack
-  while (node != nullptr) {
-    stack_nodes.push(node);
-    node = node->next;
+  while (second) {
+    temp = second->next;
+    second->next = previous;
+    previous = second;
+    second = temp;
   }
 
-  num_nodes = stack_nodes.size();
-  node = head;
-  while (num < num_nodes / 2) {
-    temp = node->next;  // 3
-    // set the next node
-    node->next = stack_nodes.top();  // 4
-    stack_nodes.pop();
+  // merge the 2 halfs of the list
+  ListNode* first = head;
+  ListNode* temp2;
+  second = previous;
+  // ListNode* temp2;
+  while (second) {
+    temp = first->next;
+    first->next = second;
 
-    node = node->next;  // 4
-    node->next = temp;  // 3
-    node = node->next;  // 3
-    num++;
+    temp2 = second->next;
+    second->next = temp;
+
+    first = temp;
+    second = temp2;
   }
-
-  node->next = nullptr;
 }
 
 int main(int argc, char const* argv[]) {
-  ListNode* n = createLinkedList({1, 2, 3, 4});
+  ListNode* n = createLinkedList({1, 2, 3, 4, 5});
   printLinkedList(n);
   reorderList(n);
   printLinkedList(n);
